@@ -37,6 +37,10 @@
 
 /* ─── Reset ─── */
 *, *::before, *::after { box-sizing: border-box; }
+
+/* سمة hidden تُحترم من أي قاعدة لاحقة مهما كانت قوتها:
+   تمنع أن تُلغي display:grid ونحوها إخفاء أي عنصر (modal/بروجزر/لوحة). */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
