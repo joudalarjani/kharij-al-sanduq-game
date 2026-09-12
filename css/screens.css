@@ -1,0 +1,582 @@
+/* ════════════════════════════════════════════
+   خارج الصندوق — أنماط الشاشات
+   ════════════════════════════════════════════ */
+
+/* ─────────────── شاشة البداية ─────────────── */
+.landing { text-align: center; padding-top: 22px; }
+
+.landing-logo {
+  width: 108px;
+  margin: 0 auto 14px;
+  animation: floaty 4.5s ease-in-out infinite;
+  filter: drop-shadow(0 12px 30px rgba(139, 92, 246, 0.4));
+}
+.l-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.l-badge .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+.l-title {
+  font-size: clamp(2.1rem, 9vw, 3.1rem);
+  font-weight: 900;
+  line-height: 1.2;
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.l-sub {
+  margin-top: 6px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.l-desc { margin-top: 14px; color: var(--text-dim); font-size: 0.95rem; max-width: 340px; margin-inline: auto; }
+
+.l-form { margin-top: 26px; text-align: right; }
+.l-form label { display: block; font-weight: 800; font-size: 0.95rem; margin-bottom: 8px; color: var(--text); }
+.l-form .field { text-align: right; }
+.l-actions { margin-top: 10px; }
+.l-footer {
+  margin-top: 28px;
+  font-size: 0.78rem;
+  color: rgba(148, 163, 184, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.l-hint-features {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.enter-anim {
+  animation: enterGame 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes enterGame {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─────────────── هيكل قمة اللعبة ─────────────── */
+.game-head { margin-bottom: 14px; }
+.progress-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--grad-brand);
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.progress-meta .stage-label { display: flex; align-items: center; gap: 6px; }
+
+.mini-logo { width: 40px; margin-inline: auto; opacity: 0.95; }
+
+/* ─────────────── بطاقة المرحلة ─────────────── */
+.stage-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.stage-banner .ico {
+  font-size: 1.7rem;
+  width: 46px; height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+}
+.stage-banner .meta { line-height: 1.3; }
+.stage-banner .t { font-weight: 900; font-size: 1.05rem; }
+.stage-banner .sm { font-size: 0.78rem; color: var(--text-dim); font-weight: 700; }
+
+/* ─────────────── المؤقت ─────────────── */
+.timer-wrap { text-align: center; margin: 6px 0 18px; }
+.timer-ring {
+  position: relative;
+  width: 84px; height: 84px;
+  margin: 0 auto;
+}
+.timer-ring svg { transform: rotate(-90deg); }
+.timer-bg { stroke: var(--surface-2); }
+.timer-fg { stroke: var(--secondary); stroke-linecap: round; transition: stroke-dashoffset 0.3s linear, stroke 0.3s; }
+.timer-fg.danger { stroke: var(--danger); animation: pulse-blink 0.9s ease infinite; }
+@keyframes pulse-blink { 50% { opacity: 0.55; } }
+.timer-num {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-family: var(--font-lat);
+  font-size: 1.7rem; font-weight: 800;
+  direction: ltr;
+}
+
+/* ─────────────── السؤال ─────────────── */
+.question-box {
+  padding: 20px 18px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.q-kicker {
+  font-size: 0.8rem; font-weight: 800;
+  color: var(--secondary);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.question-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 440px;
+}
+
+/* ─────────────── الخيارات MC ─────────────── */
+.options { display: grid; gap: 12px; }
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: right;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 1.02rem;
+  font-weight: 700;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.option:hover { transform: translateX(-4px); background: var(--surface-2); }
+.option:active { transform: scale(0.98); }
+.option .k {
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-weight: 900;
+  font-family: var(--font-lat);
+  direction: ltr;
+  color: var(--text-dim);
+}
+.option.correct {
+  border-color: var(--success);
+  background: rgba(52, 211, 153, 0.14);
+  animation: correctPulse 0.5s ease;
+}
+.option.correct .k { background: var(--success); color: #052e16; }
+.option.wrong {
+  border-color: var(--danger);
+  background: rgba(251, 113, 133, 0.12);
+  animation: shake 0.4s ease;
+}
+.option.wrong .k { background: var(--danger); color: #450a0a; }
+.option.reveal-correct { border-color: var(--success); background: rgba(52, 211, 153, 0.14); }
+.option:disabled { cursor: default; }
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+/* ─────────────── مشهد المرحلة البصرية ─────────────── */
+.scene-box { padding: 18px 14px; margin-bottom: 16px; }
+.scene-title {
+  text-align: center;
+  font-weight: 900;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.scene-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+.scene-item {
+  aspect-ratio: 1 / 0.92;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.scene-item .si-emoji { font-size: 2.5rem; line-height: 1; }
+.scene-item .si-label { font-size: 0.72rem; font-weight: 700; color: var(--text-dim); }
+.scene-item:hover { transform: translateY(-4px); background: var(--surface-2); }
+.scene-item:active { transform: scale(0.95); }
+.scene-item.correct {
+  border-color: var(--success);
+  background: rgba(52, 211, 153, 0.16);
+  animation: correctPulse 0.5s ease;
+}
+.scene-item.correct .si-label { color: var(--success); font-weight: 900; }
+.scene-item.wrong {
+  border-color: var(--danger);
+  background: rgba(251, 113, 133, 0.13);
+  animation: shake 0.4s ease;
+}
+.scene-item.disabled, .scene-item:disabled { cursor: default; }
+.scene-item:focus-visible { outline: 3px solid var(--secondary); outline-offset: 2px; }
+
+/* ─────────────── Reaction ─────────────── */
+.reaction {
+  position: fixed;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  z-index: 50;
+  background: rgba(10, 15, 34, 0.95);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 18px 26px;
+  font-size: 1.25rem;
+  font-weight: 900;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  animation: reactionPop 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  text-align: center;
+}
+.reaction .react-ico { display: block; font-size: 2rem; margin-bottom: 4px; }
+.reaction.ok { border-color: var(--success); }
+.reaction.bad { border-color: var(--danger); }
+@keyframes reactionPop {
+  0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  18%  { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+  30%  { transform: translate(-50%, -50%) scale(1); }
+  75%  { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0; }
+}
+
+/* ─────────────── نقاط مضافة ─────────────── */
+.plus-points {
+  position: fixed;
+  top: 34%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 51;
+  font-family: var(--font-lat);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 4px 18px rgba(245, 158, 11, 0.5);
+  pointer-events: none;
+  animation: floatUp 1.4s ease both;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+@keyframes floatUp {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  25%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-46px); }
+}
+
+/* ─────────────── شرح ما بعد الإجابة ─────────────── */
+.explain-strip {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  font-size: 0.92rem;
+  color: var(--text);
+  text-align: center;
+  animation: fadeUp 0.4s ease both;
+}
+.explain-strip b { color: var(--secondary); }
+
+/* ─────────────── بين المراحل ─────────────── */
+.inter-stage { text-align: center; padding-top: 30px; }
+.inter-stage .big-emoji { font-size: 4rem; animation: floaty 3s ease-in-out infinite; }
+.inter-stage h2 { font-size: 1.6rem; font-weight: 900; margin-top: 8px; }
+.inter-stage p { color: var(--text-dim); margin-top: 6px; }
+.inter-stage .btn { margin-top: 26px; }
+
+/* ─────────────── النتيجة ─────────────── */
+.result-hero { text-align: center; padding: 26px 18px 22px; position: relative; overflow: hidden; }
+.result-trophies {
+  position: absolute; inset: 0;
+  font-size: 3rem;
+  opacity: 0.12;
+  display: flex; align-items: center; justify-content: space-around;
+  pointer-events: none;
+}
+.result-title { font-size: 1.55rem; font-weight: 900; }
+.result-name {
+  margin-top: 6px;
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 1.25;
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  word-break: break-word;
+}
+.result-score {
+  margin-top: 12px;
+  font-size: 2rem;
+  font-weight: 900;
+  font-family: var(--font-lat);
+  color: var(--accent);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.result-msg { margin-top: 10px; font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.result-rank-box {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.rank-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  min-width: 120px;
+}
+.rank-chip .lb { font-size: 0.72rem; font-weight: 800; color: var(--text-dim); }
+.rank-chip .vl { font-size: 1.35rem; font-weight: 900; font-family: var(--font-lat); direction: ltr; }
+.rank-chip.hl {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: rgba(245, 158, 11, 0.08);
+}
+.rank-chip.hl .vl { color: var(--accent); }
+
+/* podium */
+.podium { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-top: 22px; }
+.podium .col { width: 88px; text-align: center; }
+.podium .medal { font-size: 1.5rem; display: block; }
+.podium .nm {
+  font-size: 0.82rem; font-weight: 900;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.podium .bar {
+  margin: 6px auto 0;
+  border-radius: 12px 12px 4px 4px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-lat); font-weight: 900; color: #fff;
+}
+.podium .p1 { height: 120px; background: var(--grad-gold); animation: growBar 0.7s ease both; }
+.podium .p2 { height: 88px;  background: linear-gradient(#94A3B8, #64748B); animation: growBar 0.7s ease 0.1s both; }
+.podium .p3 { height: 64px;  background: linear-gradient(#D97706, #92400E); animation: growBar 0.7s ease 0.2s both; }
+@keyframes growBar { from { height: 0; } }
+
+.result-actions { margin-top: 20px; display: grid; gap: 12px; }
+.result-credit {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(148, 163, 184, 0.62);
+}
+
+/* ─────────────── التقييم ─────────────── */
+.feedback { margin-top: 18px; padding: 18px 16px; }
+.feedback h3 { font-size: 1.05rem; font-weight: 900; text-align: center; }
+.feedback .q { text-align: center; font-size: 0.95rem; font-weight: 700; margin-top: 4px; }
+.stars { display: flex; justify-content: center; gap: 8px; margin: 14px 0 4px; }
+.star-btn {
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  padding: 4px;
+  color: rgba(148, 163, 184, 0.35);
+  transition: transform 0.15s ease, color 0.15s ease;
+  filter: grayscale(1);
+}
+.star-btn:hover { transform: scale(1.2); }
+.star-btn.on { color: var(--accent); filter: none; transform: scale(1.05); }
+.stars-label { text-align: center; font-size: 0.8rem; font-weight: 800; color: var(--text-dim); min-height: 1.3em; margin-bottom: 10px; }
+.feedback textarea { width: 100%; margin-top: 6px; }
+.feedback .char-count { text-align: left; font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; direction: ltr; }
+.feedback-thanks {
+  text-align: center;
+  padding: 10px;
+  color: var(--success);
+  font-weight: 900;
+  animation: pop 0.4s ease both;
+}
+
+/* ─────────────── المودال Leaderboard ─────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 16, 0.72);
+  backdrop-filter: blur(6px);
+  z-index: 90;
+  display: grid;
+  place-items: end center;
+  animation: fadeUp 0.3s ease both;
+}
+.modal-sheet {
+  width: 100%;
+  max-width: var(--maxw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #0B1120;
+  border: 1px solid var(--border);
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.6);
+  animation: sheetUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.modal-head {
+  padding: 18px 20px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.modal-head h2 { font-size: 1.3rem; font-weight: 900; }
+.modal-head .sub { font-size: 0.82rem; color: var(--text-dim); font-weight: 700; }
+.modal-close {
+  position: absolute;
+  top: 12px; left: 12px;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 1rem;
+}
+.modal-body { overflow-y: auto; padding: 14px 16px 22px; }
+
+/* قائمة الترتيب */
+.lb-list { display: grid; gap: 8px; }
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.lb-row .pos {
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  font-family: var(--font-lat);
+  font-weight: 900;
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+.lb-row.top1 .pos { background: var(--grad-gold); color: #422006; }
+.lb-row.top2 .pos { background: linear-gradient(#CBD5E1, #64748B); color: #0f172a; }
+.lb-row.top3 .pos { background: linear-gradient(#D97706, #92400E); color: #fff; }
+.lb-row .nm { flex: 1; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-row .pt {
+  font-family: var(--font-lat);
+  font-weight: 900;
+  color: var(--accent);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.lb-row .tm { font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-lat); direction: ltr; }
+.lb-row.me {
+  border-color: var(--secondary);
+  background: rgba(34, 211, 238, 0.1);
+  animation: pulseGlow 2.2s ease-in-out infinite;
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25);
+}
+.lb-row.me .pos { background: var(--secondary); color: #083344; }
+.you-tag { font-size: 0.7rem; font-weight: 900; color: var(--secondary); white-space: nowrap; }
+
+.lb-empty { text-align: center; padding: 30px 10px; color: var(--text-dim); font-weight: 700; }
+.lb-loading { text-align: center; padding: 26px; color: var(--text-dim); font-weight: 700; }
+.lb-loading .spin {
+  display: inline-block;
+  width: 34px; height: 34px;
+  border: 3px solid var(--surface-2);
+  border-top-color: var(--secondary);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─────────────── Admin ═────────────── */
+.admin-wrap { max-width: 760px; margin: 0 auto; padding: 20px; }
+.admin-wrap h1 { text-align: center; margin-bottom: 10px; }
+.admin-card { padding: 16px; margin-top: 14px; }
+.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 12px 0; }
+.admin-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  text-align: center;
+}
+.admin-stat .v { font-family: var(--font-lat); font-size: 1.6rem; font-weight: 900; color: var(--secondary); direction: ltr; }
+.admin-stat .l { font-size: 0.75rem; color: var(--text-dim); font-weight: 800; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th, .admin-table td {
+  text-align: right;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  vertical-align: top;
+}
+.admin-table th { color: var(--text-dim); font-weight: 800; font-size: 0.75rem; white-space: nowrap; }
+.admin-table .n { font-family: var(--font-lat); direction: ltr; }
+.admin-tabs { display: flex; gap: 8px; margin: 12px 0; }
+.admin-tabs .btn { width: auto; padding: 9px 18px; font-size: 0.9rem; }
+
+@media (min-width: 600px) {
+  .modal-backdrop { place-items: center; padding: 20px; }
+  .modal-sheet { border-radius: 26px; max-height: 86vh; }
+}

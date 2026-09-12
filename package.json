@@ -1,0 +1,13 @@
+{
+  "name": "kharij-al-sanduq",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "خارج الصندوق — لعبة ألغاز تفاعلية لنادي الابتكار وريادة الأعمال",
+  "scripts": {
+    "test": "node tests/run.test.mjs && node tests/flow.test.mjs && node tests/ui-smoke.mjs",
+    "test:core": "node tests/run.test.mjs && node tests/flow.test.mjs",
+    "generate:seed": "node tools/generate-questions-seed.mjs",
+    "serve": "npx --yes serve -s . -l 8080"
+  }
+}

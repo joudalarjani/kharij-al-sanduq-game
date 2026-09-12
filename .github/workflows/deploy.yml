@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # حقن إعدادات Supabase من GitHub Secrets وقت البناء (لا تُرفع مع الريبو).
+      # إذا لم تُضبط Secrets يعمل الموقع في الوضع التجريبي المحلي.
+      - name: Inject Supabase config
+        run: node tools/build-config.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      # بوابة جودة: اختبارات المنطق والتدفق قبل النشر
+      - name: Run logic tests
+        run: node tests/run.test.mjs && node tests/flow.test.mjs
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy
+        uses: actions/deploy-pages@v4

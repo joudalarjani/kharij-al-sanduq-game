@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>لوحة إدارة | خارج الصندوق</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css?v=1.0.0">
+  <link rel="stylesheet" href="css/screens.css?v=1.0.0">
+</head>
+<body>
+  <div class="bg-canvas" aria-hidden="true">
+    <div class="bg-orb o1"></div>
+    <div class="bg-orb o2"></div>
+  </div>
+
+  <div class="admin-wrap">
+    <h1>🔐 لوحة إدارة التحدي</h1>
+    <p style="text-align:center;color:var(--text-dim);font-size:.9rem">خارج الصندوق — نادي الابتكار وريادة الأعمال</p>
+
+    <div id="gateBox" class="card admin-card" style="max-width:420px;margin:40px auto">
+      <label for="adminPass" style="display:block;font-weight:800;margin-bottom:8px">كلمة المرور</label>
+      <input class="field" type="password" id="adminPass" placeholder="••••••••" autocomplete="off" aria-describedby="gateMsg">
+      <p class="error-msg" id="gateMsg" aria-live="polite"></p>
+      <button class="btn" id="gateBtn" style="margin-top:6px">دخول</button>
+    </div>
+
+    <div id="appBox" hidden>
+      <div class="admin-card card" id="modeCard"></div>
+      <div class="admin-stats" id="statsRow"></div>
+      <div class="card admin-card">
+        <div class="admin-tabs">
+          <button class="btn small ghost" data-tab="entries">المشاركون</button>
+          <button class="btn small ghost" data-tab="feedback">التقييمات والاقتراحات</button>
+        </div>
+        <div id="tableArea"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/admin-app.js?v=1.0.0"></script>
+</body>
+</html>

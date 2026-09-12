@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="نادي الابتكار وريادة الأعمال">
+  <defs>
+    <linearGradient id="gb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="gg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <circle cx="110" cy="110" r="104" fill="#0C1228" stroke="url(#gb)" stroke-width="3"/>
+  <circle cx="110" cy="110" r="96" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+  <!-- الصندوق -->
+  <g>
+    <rect x="52" y="92" width="66" height="56" rx="10" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+    <path d="M52 108 L118 108" stroke="#F1F5F9" stroke-width="7"/>
+  </g>
+  <!-- الفكرة تخرج من الصندوق -->
+  <g fill="url(#gb)">
+    <path d="M128 100 l22 -16 8 26 z"/>
+  </g>
+  <g fill="url(#gg)">
+    <path d="M155 66 c0 -7 13 -7 13 0 s-13 7 -13 0z" />
+    <path d="M160 72 l4 14 2 -13z"/>
+    <rect x="159" y="86" width="8" height="6" rx="3"/>
+  </g>
+  <text x="110" y="186" text-anchor="middle" font-family="Tahoma, Arial" font-size="13" font-weight="bold" fill="#94A3B8">نادي الابتكار وريادة الأعمال</text>
+</svg>
