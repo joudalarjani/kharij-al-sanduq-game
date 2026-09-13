@@ -4,19 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>خارج الصندوق | نادي الابتكار وريادة الأعمال</title>
-  <meta name="description" content="أربع مراحل، أسئلة غير متوقعة، ونقاط تحدد مكانك بين المتسابقين — هل تستطيع التفكير بطريقة مختلفة؟">
-  <meta name="theme-color" content="#070B18">
+  <meta name="description" content="لعبة ألغاز جامعية تفاعلية عن الاستثمار وريادة الأعمال — أربع مراحل، عشرة أنواع ألغاز، لوحة متصدرين. هل تفكر خارج الصندوق؟">
+  <meta name="theme-color" content="#06141A">
+  <meta property="og:title" content="خارج الصندوق | نادي الابتكار وريادة الأعمال">
+  <meta property="og:description" content="لعبة ألغاز جامعية عن الاستثمار وريادة الأعمال — اختبر قدرتك على التفكير الريادي.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/base.css?v=2.0.0">
-  <link rel="stylesheet" href="css/screens.css?v=2.0.0">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css?v=3.0.0">
+  <link rel="stylesheet" href="css/screens.css?v=3.0.0">
+  <link rel="stylesheet" href="css/puzzles.css?v=3.0.0">
 </head>
 <body>
 
   <!-- خلفية -->
   <div class="bg-canvas" aria-hidden="true">
+    <div class="bg-grid"></div>
     <div class="bg-orb o1"></div>
     <div class="bg-orb o2"></div>
     <div class="bg-orb o3"></div>
@@ -29,13 +33,38 @@
     <!-- ══════════ شاشة البداية ══════════ -->
     <section id="landingScreen" class="screen active" aria-labelledby="landingTitle">
       <div class="landing">
-        <img class="landing-logo" src="assets/club-logo.svg" alt="شعار نادي الابتكار وريادة الأعمال" width="108" height="108">
-        <div class="l-badge reveal"><span class="dot"></span> نادي الابتكار وريادة الأعمال</div>
-        <h1 class="l-title reveal reveal-1" id="landingTitle">خارج الصندوق</h1>
-        <p class="l-sub reveal reveal-1">هل تستطيع التفكير بطريقة مختلفة؟</p>
-        <p class="l-desc reveal reveal-2">4 مراحل، أسئلة غير متوقعة، ونقاط تحدد مكانك بين المتسابقين.</p>
+        <div class="hero-brand reveal">
+          <div class="hb-badge"><span class="dot"></span> نادي الابتكار وريادة الأعمال</div>
+          <img class="landing-logo reveal reveal-1" src="assets/club-logo.svg" alt="شعار نادي الابتكار وريادة الأعمال" width="124" height="124">
+        </div>
 
-        <form class="l-form reveal reveal-2" id="nameForm" novalidate>
+        <h1 class="l-title reveal reveal-1" id="landingTitle">خارج الصندوق</h1>
+        <p class="l-sub reveal reveal-2">فكّر كريادي… واستثمر بذكاء</p>
+        <p class="l-desc reveal reveal-2">أربع مراحل من الألغاز والتحديات تختبر قدرتك على التفكير الاستثماري واتخاذ القرارات الريادية.</p>
+
+        <div class="stage-preview reveal reveal-3" aria-label="معاينة المراحل">
+          <div class="sp-item" style="--sp:#14B8A6">
+            <span class="sp-emoji">📊</span>
+            <span class="sp-label">أساسيات المستثمر</span>
+          </div>
+          <span class="sp-arrow">→</span>
+          <div class="sp-item" style="--sp:#10B981">
+            <span class="sp-emoji">🚀</span>
+            <span class="sp-label">عقلية الريادي</span>
+          </div>
+          <span class="sp-arrow">→</span>
+          <div class="sp-item" style="--sp:#22D3EE">
+            <span class="sp-emoji">🧠</span>
+            <span class="sp-label">اختبر قرارك</span>
+          </div>
+          <span class="sp-arrow">→</span>
+          <div class="sp-item" style="--sp:#FBBF24">
+            <span class="sp-emoji">🔥</span>
+            <span class="sp-label">خارج الصندوق</span>
+          </div>
+        </div>
+
+        <form class="l-form reveal reveal-3" id="nameForm" novalidate>
           <label for="playerName">اكتب اسمك</label>
           <input class="field" id="playerName" name="playerName" type="text"
                  autocomplete="off" spellcheck="false"
@@ -43,15 +72,17 @@
                  placeholder="اسمك هنا…" aria-describedby="nameError">
           <p class="error-msg" id="nameError" aria-live="polite"></p>
           <div class="l-actions">
-            <button type="submit" class="btn" id="startBtn">
-              <span>ابدأ التحدي 🚀</span>
+            <button type="submit" class="btn primary" id="startBtn">
+              <span>ابدأ التحدي</span>
+              <span class="btn-arrow" aria-hidden="true">←</span>
             </button>
           </div>
         </form>
 
         <div class="l-hint-features reveal reveal-3" aria-hidden="true">
           <span class="pill">⚡ 4 مراحل</span>
-          <span class="pill">⏱️ مؤقت</span>
+          <span class="pill">🧩 10 أنواع ألغاز</span>
+          <span class="pill">⏱️ مؤقت تفاعلي</span>
           <span class="pill">🏆 لوحة متصدرين</span>
         </div>
 
@@ -85,6 +116,6 @@
 
   </div>
 
-  <script type="module" src="js/app.js?v=2.0.0"></script>
+  <script type="module" src="js/app.js?v=3.0.0"></script>
 </body>
 </html>

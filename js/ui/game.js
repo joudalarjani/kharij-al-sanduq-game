@@ -1,18 +1,19 @@
 /*
-  واجهة اللعب: المقدمة بين المراحل، السؤال، المؤقت، الـReactions، الشرح.
-  يدعم نوعَي السؤال: اختيارات (mc) ومشهد بصري (visual).
+  واجهة اللعب: شاشة البداية، شاشة المرحلة، السؤال، المؤقت، التغذية الراجعة.
+  يدعم 11 نوع سؤال من خلال js/ui/puzzles/.
 */
 
 import { GameSession } from '../core/game.js';
 import { STAGES_META } from '../data/questions.js';
-import { SCORING, GAME } from '../config.js';
+import { SCORING, GAME, STAGE_THEMES } from '../config.js';
 import { pickIntro, pickCorrect, pickWrong } from './reactions.js';
 import { timerRingHTML, updateTimer } from './timer.js';
 import { escapeHTML } from '../core/validation.js';
 import { el, showScreen } from './screen.js';
 import { formatSeconds } from '../core/dice.js';
+import { renderPuzzle, bindPuzzle, revealPuzzle, gradePuzzle, typeLabel } from './puzzles/index.js';
 
-const REACTION_MS = 2300;
+const REACTION_MS = 2400;
 const TICK_MS = 100;
 
 let session = null;
@@ -28,7 +29,8 @@ export function startGame(name, finishCb) {
   session.pickQuestions();
   onFinish = finishCb;
   answerLocked = false;
-  showStageIntro(0);
+  // خريطة المراحل قبل البداية
+  showStageMap(0);
 }
 
 function root() {
@@ -39,19 +41,27 @@ function totalSoFar() {
   return session.totalScore();
 }
 
+/* ─── رأس اللعبة: تقدم + شعار مصغّر + نقاط ─── */
 function renderHead(currentStage) {
   const meta = STAGES_META[currentStage];
   return `
     <div class="game-head reveal">
       <div class="progress-track" role="progressbar"
-           aria-valuemin="0" aria-valuemax="${GAME.stagesCount}" aria-valuenow="${currentStage}"
+           aria-valuemin="0" aria-valuemax="${GAME.stagesCount}" aria-valuenow="${currentStage - 1}"
            aria-label="تقدم المراحل">
         <div class="progress-fill" id="progressFill" style="width:${((currentStage - 1) / GAME.stagesCount) * 100}%"></div>
       </div>
       <div class="progress-meta">
-        <span class="stage-label"><span>المرحلة</span>
+        <span class="stage-label">
+          <span class="logo-pill">
+            <img src="assets/club-logo.svg" alt="" width="22" height="22" aria-hidden="true">
+            <span>نادي الابتكار</span>
+          </span>
+          <span>المرحلة</span>
           <b class="num">${currentStage}</b>
-          <span>من</span> <b class="num">${GAME.stagesCount}</b></span>
+          <span>/</span>
+          <b class="num">${GAME.stagesCount}</b>
+        </span>
         <span class="num score-now" style="color:var(--accent);font-weight:900">${formatPoints(totalSoFar())}</span>
       </div>
     </div>`;
@@ -60,38 +70,62 @@ function renderHead(currentStage) {
 function renderStageBanner(currentStage) {
   const meta = STAGES_META[currentStage];
   return `
-    <div class="stage-banner">
+    <div class="stage-banner" style="--stage-color:${meta.color}">
       <div class="ico" style="background:${meta.color}22;color:${meta.color}">${meta.emoji}</div>
       <div class="meta">
-        <div class="t">${meta.title}</div>
-        <div class="sm">المرحلة ${currentStage} · ${meta.color === STAGES_META[4].color ? 'الفرصة الأخيرة — النقاط مضاعفة' : '+ نقاط × البونص السريع'}</div>
+        <div class="t">${escapeHTML(meta.title)}</div>
+        <div class="sm">${escapeHTML(meta.subtitle || '')}</div>
+      </div>
+      <span class="stage-pill" style="background:${meta.color}22;color:${meta.color}">المرحلة ${currentStage}</span>
+    </div>`;
+}
+
+/* ─── خريطة المراحل (بين المراحل وفي البداية) ─── */
+function showStageMap(nextStage) {
+  const stages = Object.values(STAGE_THEMES);
+  showScreen('game');
+  const finishedCount = nextStage; // عدد المراحل المكتملة قبل هذه
+  root().innerHTML = `
+    ${renderHead(Math.max(1, nextStage))}
+    <div class="stage-map card reveal">
+      <div class="sm-head">
+        <div class="sm-title">${nextStage === 0 ? '🗺️' : '✅'} ${nextStage === 0 ? 'خريطة التحدي' : 'تقدّم مذهل!'}</div>
+        <div class="sm-sub">${nextStage === 0
+          ? 'أربع مراحل من الألغاز — كل مرحلة بنكهة مختلفة. كم مرحلة ستكملها بذكاء؟'
+          : `أكملت ${finishedCount} من ${GAME.stagesCount} مراحل. باقي ${GAME.stagesCount - finishedCount} 🔥`}</div>
+      </div>
+      <div class="sm-grid">
+        ${stages.map((s, i) => {
+          const status = i < nextStage ? 'done' : i === nextStage ? 'current' : 'locked';
+          return `
+            <div class="sm-card ${status}" style="--stage-color:${s.accent}">
+              <div class="sm-num">${i + 1}</div>
+              <div class="sm-emoji">${s.emoji}</div>
+              <div class="sm-title-2">${escapeHTML(s.title)}</div>
+              <div class="sm-desc">${escapeHTML(s.subtitle)}</div>
+              <span class="sm-status">${
+                status === 'done' ? '✅ منجزة' :
+                status === 'current' ? '👉 التالية' : '🔒 مقفلة'
+              }</span>
+            </div>`;
+        }).join('')}
+      </div>
+      <div class="sm-actions">
+        ${nextStage === 0
+          ? `<button class="btn primary" id="beginStageBtn">${pickIntro()} <span aria-hidden="true">→</span></button>`
+          : `<button class="btn primary" id="beginStageBtn">المرحلة ${nextStage + 1}: ${escapeHTML(stages[nextStage].title)} →</button>`
+        }
       </div>
     </div>`;
+  el('beginStageBtn').addEventListener('click', () => showQuestion(nextStage));
 }
 
+/* ─── شاشة تقديم المرحلة قبل السؤال ─── */
 function showStageIntro(index) {
-  const stage = index + 1;
-  const meta = STAGES_META[stage];
-  const isVisual = session.stageQuestion(index)?.type === 'visual';
-  const instruction = isVisual
-    ? 'لاحظ المشهد جيدًا ثم اضغط على العنصر الذي لا ينتمي.'
-    : 'اقرأ السؤال بسرعة واختر إجابتك قبل انتهاء الوقت.';
-
-  showScreen('game');
-  root().innerHTML = `
-    ${renderHead(stage)}
-    <div class="card inter-stage reveal">
-      <div class="big-emoji">${meta.emoji}</div>
-      <h2 style="color:${meta.color}">${meta.title}</h2>
-      <p>${instruction}</p>
-      <p style="font-size:.8rem;opacity:.8">${pickIntro()}</p>
-      <button class="btn" id="beginStageBtn" style="background:linear-gradient(135deg,${meta.color},${meta.color}CC)">
-        ابدأ <span class="num">${'⏱'}</span> <span class="num">${SCORING.timeouts[stage]}</span>ث
-      </button>
-    </div>`;
-  el('beginStageBtn').addEventListener('click', () => showQuestion(index));
+  showStageMap(index);
 }
 
+/* ─── سؤال واحد ─── */
 function showQuestion(index) {
   const q = session.stageQuestion(index);
   if (!q) return;
@@ -104,12 +138,18 @@ function showQuestion(index) {
     ${renderHead(stage)}
     ${renderStageBanner(stage)}
     <div class="card question-box reveal">
-      <div class="q-kicker">${meta.emoji} ${meta.title} — السؤال ${index + 1}</div>
-      <p class="question-text">${escapeHTML(q.question)}</p>
+      <div class="q-kicker">${meta.emoji} ${escapeHTML(meta.title)} · ${escapeHTML(typeLabel(q.type))}</div>
     </div>
     ${timerRingHTML()}
-    ${renderQuestionBody(q)}
+    <div id="puzzleMount"></div>
     <div class="explain-strip" id="explainStrip" hidden aria-live="polite"></div>`;
+
+  // تركيب اللغز
+  const mount = el('puzzleMount');
+  const puzzleWrap = document.createElement('div');
+  puzzleWrap.className = 'puzzle-wrap';
+  puzzleWrap.innerHTML = renderPuzzle(q);
+  mount.appendChild(puzzleWrap);
 
   questionTotalMs = session.stageTimeLimitMs(index);
   questionStart = Date.now();
@@ -128,118 +168,93 @@ function showQuestion(index) {
     updateTimer(fg, num, remaining, questionTotalMs);
   }, TICK_MS);
 
-  resolveRef = (selectedIndex) => {
+  resolveRef = (selected) => {
     if (answerLocked) return;
     answerLocked = true;
     clearInterval(timerId);
     timerId = null;
     const elapsed = Date.now() - questionStart;
     const remaining = Math.max(0, questionTotalMs - elapsed);
-    const result = session.resolveAnswer(index, selectedIndex, remaining, questionTotalMs, elapsed);
-    showAnswerFeedback(index, result, selectedIndex);
+    const result = session.resolveAnswer(index, selected, remaining, questionTotalMs, elapsed);
+    showAnswerFeedback(index, result, selected);
   };
 
-  bindQuestionEvents(q, index, meta);
-}
-
-function renderQuestionBody(q) {
-  if (q.type === 'visual') {
-    const items = q.scene.items;
-    return `
-      <div class="card scene-box reveal reveal-1">
-        <div class="scene-title">${q.scene.title}</div>
-        <div class="scene-grid">
-          ${items.map((it, i) => `
-            <button class="scene-item" data-qindex="${i}" data-oid="${it.id}"
-                    aria-label="${escapeHTML(it.label)} — اختر العنصر الغريب">
-              <span class="si-emoji">${it.emoji}</span>
-              <span class="si-label">${escapeHTML(it.label)}</span>
-            </button>`).join('')}
-        </div>
-      </div>`;
-  }
-
-  const letters = ['أ', 'ب', 'ج', 'د'];
-  return `
-    <div class="options">
-      ${q.options.map((opt, i) => `
-        <button class="option" data-qindex="${i}" aria-pressed="false">
-          <span class="k">${letters[i]}</span>
-          <span>${escapeHTML(opt)}</span>
-        </button>`).join('')}
-    </div>`;
-}
-
-function bindQuestionEvents(q, index, meta) {
-  root().querySelectorAll('[data-qindex]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const i = Number(btn.dataset.qindex);
-      resolveRef(i);
-    });
-  });
+  bindPuzzle(q, puzzleWrap, (sel) => resolveRef(sel));
 }
 
 function onTimeout(index) {
   const result = session.resolveTimeout(index, questionTotalMs);
   const q = session.stageQuestion(index);
   answerLocked = true;
-  showAnswerFeedback(index, result, -1);
+  // نحاول إظهار الإجابة الصحيحة حتى في انتهاء الوقت
+  showAnswerFeedback(index, result, null);
 }
 
-function showAnswerFeedback(index, result, selectedIndex) {
+/* ─── التغذية الراجعة بعد الإجابة ─── */
+function showAnswerFeedback(index, result, selected) {
   const q = session.stageQuestion(index);
-  const correct = result.correct;
   const meta = STAGES_META[index + 1];
+  const correct = result.correct;
 
-  // تمييز بصري (لا يعتمد على اللون وحده)
-  if (q.type === 'visual') {
-    if (selectedIndex >= 0) markScene(selectedIndex, correct);
-    if (!correct) markScene(q.scene.items.findIndex((it) => it.isOdd), true, true);
-  } else {
-    if (selectedIndex >= 0) markOption(selectedIndex, correct);
-    if (!correct) markOption(q.answerIndex, true, true);
-  }
+  // تمييز بصري للإجابة الصحيحة والخاطئة
+  const state = { selected, correct, locked: true };
+  revealPuzzle(q, root(), state);
 
+  // رد فعل
   const reaction = correct ? pickCorrect() : pickWrong();
-  const icon = correct ? '🎉' : selectedIndex === -1 ? '⏰' : '😅';
+  const icon = correct ? '🎉' : selected === null || selected === -1 ? '⏰' : '💡';
   showReaction(reaction, correct, icon);
 
-  if (correct && result.points > 0) {
-    showPlusPoints(result.points);
-  }
+  if (correct && result.points > 0) showPlusPoints(result.points);
 
   const explainEl = el('explainStrip');
   explainEl.hidden = false;
-  explainEl.innerHTML = correct
-    ? `<b>${result.points} نقطة</b> — ${escapeHTML(q.explain)}`
-    : `<b>الإجابة: ${escapeHTML(correctText(q))}</b> — ${escapeHTML(q.explain)}`;
+  const correctAnswerText = correctAnswerLabel(q, result);
+  explainEl.innerHTML = `
+    <div class="explain-head">
+      <span class="explain-tag ${correct ? 'ok' : 'bad'}">${correct ? '✅ قرار ذكي' : '⚠️ ليست أفضل إجابة'}</span>
+      ${correct && result.points ? `<b class="num">+${result.points} نقطة</b>` : ''}
+    </div>
+    ${!correct && correctAnswerText ? `<p class="explain-correct"><b>الإجابة:</b> ${correctAnswerText}</p>` : ''}
+    <p class="explain-body">${escapeHTML(q.explain || '')}</p>
+    ${q.learning ? `<p class="explain-learn">💡 ${escapeHTML(q.learning)}</p>` : ''}
+  `;
 
   setTimeout(() => advance(index), REACTION_MS);
 }
 
-function correctText(q) {
+function correctAnswerLabel(q, result) {
   if (q.type === 'visual') {
     const odd = q.scene.items.find((it) => it.isOdd);
-    return odd ? odd.label : '';
+    return odd ? `${odd.emoji} ${odd.label}` : '';
   }
-  return q.options[q.answerIndex] || '';
-}
-
-function markOption(index, correct, revealOnly = false) {
-  const btns = root().querySelectorAll('.option');
-  if (!btns[index]) return;
-  btns[index].classList.add(correct ? 'correct' : 'wrong');
-  btns[index].setAttribute('aria-pressed', correct ? 'true' : 'false');
-  if (revealOnly) btns[index].classList.add('reveal-correct');
-  btns.forEach((b) => { if (b !== btns[index]) b.disabled = true; });
-}
-
-function markScene(index, correct, revealOnly = false) {
-  const items = root().querySelectorAll('.scene-item');
-  if (!items[index]) return;
-  items[index].classList.add(correct ? 'correct' : 'wrong');
-  if (revealOnly) items[index].classList.add('correct');
-  items.forEach((b) => { if (b !== items[index]) b.disabled = true; });
+  if (q.type === 'findError') {
+    const seg = q.segments.find((s) => s.id === q.correctId);
+    return seg ? `${seg.id.toUpperCase()}) ${seg.text}` : '';
+  }
+  if (q.type === 'truefalse') {
+    return q.correctAnswer === 'agree' ? 'أوافق 🤝' : 'أرفض ✋';
+  }
+  if (q.type === 'calc') {
+    return `${result.expected}${q.unit ? q.unit : ''}`;
+  }
+  if (q.type === 'word') {
+    return result.expected;
+  }
+  if (q.type === 'match') {
+    const parts = q.pairs.map((p) => `${p.term} = ${p.def}`);
+    return parts.join(' · ');
+  }
+  if (q.type === 'order') {
+    return (result.answerOrder || []).map((id, i) => {
+      const item = q.items.find((it) => it.id === id);
+      return item ? `${i + 1}) ${item.text}` : '';
+    }).filter(Boolean).join(' → ');
+  }
+  if (typeof q.answerIndex === 'number' && q.options && q.options[q.answerIndex] != null) {
+    return q.options[q.answerIndex];
+  }
+  return '';
 }
 
 function showReaction(text, ok, icon) {
@@ -248,7 +263,7 @@ function showReaction(text, ok, icon) {
   d.setAttribute('aria-live', 'assertive');
   d.innerHTML = `<span class="react-ico">${icon}</span>${escapeHTML(text)}`;
   document.body.appendChild(d);
-  setTimeout(() => d.remove(), 1500);
+  setTimeout(() => d.remove(), 1700);
 }
 
 function showPlusPoints(points) {
@@ -262,7 +277,7 @@ function showPlusPoints(points) {
 function advance(index) {
   const next = index + 1;
   if (next < GAME.stagesCount) {
-    showStageIntro(next);
+    showStageMap(next);
   } else {
     finish();
   }

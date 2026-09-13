@@ -1,0 +1,605 @@
+/* ════════════════════════════════════════════
+   خارج الصندوق — أنماط أنواع الألغاز
+   MC · decision · whatWould · findError · order
+   match · calc · scenario · truefalse · word · visual
+   ════════════════════════════════════════════ */
+
+/* ─── سياق اللغز (قرار/وش تسوي؟) ─── */
+.scenario-card {
+  background: linear-gradient(135deg, rgba(20,184,166,0.08), rgba(16,185,129,0.04));
+  border: 1px solid rgba(20,184,166,0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  text-align: right;
+}
+.scenario-card .scenario-ico {
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(20,184,166,0.18);
+  border-radius: 12px;
+  font-size: 1.4rem;
+}
+.scenario-card .situation p {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.7;
+  margin: 0 0 6px;
+}
+.scenario-card .situation p:last-child { margin-bottom: 0; }
+
+/* ═══════════════════════════════════════
+   decision / whatWould — خيار بعرض كامل
+   ═══════════════════════════════════════ */
+.option.decision-opt,
+.option.ww-opt {
+  align-items: flex-start;
+  padding: 14px 16px;
+}
+.option.ww-opt .txt { line-height: 1.6; }
+.option.decision-opt .k {
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════
+   findError — بطاقات أجزاء
+   ═══════════════════════════════════════ */
+.puzzle.find-error .segments {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+.segment {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 14px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-align: right;
+  width: 100%;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  position: relative;
+}
+.segment:hover {
+  transform: translateX(-4px);
+  background: rgba(20,184,166,0.08);
+  border-color: rgba(20,184,166,0.3);
+}
+.segment .seg-marker {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  background: rgba(20,184,166,0.18);
+  border-radius: 10px;
+  font-family: var(--font-lat);
+  font-weight: 900;
+  font-size: 0.92rem;
+  color: var(--primary);
+  margin-top: 1px;
+}
+.segment .seg-text {
+  flex: 1;
+  line-height: 1.6;
+}
+.segment .seg-check {
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.segment.is-error { display: none; } /* يُستخدم فقط عند الإظهار بعد الإجابة */
+.segment.correct {
+  border-color: var(--success);
+  background: rgba(52,211,153,0.14);
+  animation: correctPulse 0.5s ease;
+}
+.segment.correct .seg-marker {
+  background: var(--success);
+  color: #052e16;
+}
+.segment.wrong {
+  border-color: var(--danger);
+  background: rgba(251,113,133,0.12);
+  animation: shake 0.4s ease;
+}
+.segment.wrong .seg-marker {
+  background: var(--danger);
+  color: #450a0a;
+}
+.segment.correct .seg-check,
+.segment.wrong .seg-check { opacity: 1; color: inherit; }
+.segment:disabled { cursor: default; }
+
+/* ═══════════════════════════════════════
+   order — ترتيب البطاقات
+   ═══════════════════════════════════════ */
+.puzzle.order { margin-top: 4px; }
+.order-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.order-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+.order-card:hover {
+  border-color: rgba(20,184,166,0.3);
+  background: rgba(20,184,166,0.06);
+}
+.order-card.dragging {
+  opacity: 0.4;
+  transform: scale(0.98);
+}
+.order-pos {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--grad-brand);
+  color: #042F2E;
+  font-family: var(--font-lat);
+  font-weight: 900;
+  font-size: 0.95rem;
+  direction: ltr;
+}
+.order-text {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+.order-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.order-btn {
+  width: 32px; height: 28px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.order-btn:hover {
+  background: rgba(20,184,166,0.18);
+  color: var(--primary);
+  transform: scale(1.05);
+}
+.order-btn:active { transform: scale(0.92); }
+
+.order-card.correct {
+  border-color: var(--success);
+  background: rgba(52,211,153,0.1);
+}
+.order-card.correct .order-pos { background: var(--success); color: #052e16; }
+.order-card.wrong {
+  border-color: var(--danger);
+  background: rgba(251,113,133,0.1);
+}
+.order-card.wrong .order-pos { background: var(--danger); color: #450a0a; }
+
+.order-confirm { margin-top: 8px; }
+
+/* ═══════════════════════════════════════
+   match — مطابقة
+   ═══════════════════════════════════════ */
+.puzzle.match { margin-top: 4px; }
+.match-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.match-col {
+  display: grid;
+  gap: 10px;
+}
+.match-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: right;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  width: 100%;
+}
+.match-card:hover {
+  transform: translateY(-2px);
+  background: rgba(20,184,166,0.08);
+  border-color: rgba(20,184,166,0.3);
+}
+.match-card.selected {
+  border-color: var(--primary);
+  background: rgba(20,184,166,0.16);
+  box-shadow: 0 0 0 3px rgba(20,184,166,0.2);
+}
+.match-card.correct {
+  border-color: var(--success);
+  background: rgba(52,211,153,0.14);
+}
+.match-card.wrong {
+  border-color: var(--danger);
+  background: rgba(251,113,133,0.12);
+}
+.match-card.def .match-def {
+  font-size: 0.86rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  line-height: 1.5;
+}
+.match-card .match-term {
+  color: var(--primary);
+  font-family: var(--font-lat);
+  font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+.match-card:disabled { cursor: default; }
+
+@media (max-width: 480px) {
+  .match-grid { grid-template-columns: 1fr; gap: 10px; }
+}
+
+.match-confirm { margin-top: 8px; }
+
+/* ═══════════════════════════════════════
+   calc — حقل إدخال الحساب
+   ═══════════════════════════════════════ */
+.puzzle.calc { margin-top: 4px; }
+.calc-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.calc-field {
+  flex: 1;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: var(--font-lat);
+  direction: ltr;
+  unicode-bidi: isolate;
+  padding: 14px 18px;
+}
+.calc-unit {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-family: var(--font-lat);
+  padding: 10px 14px;
+  background: rgba(20,184,166,0.1);
+  border: 1px solid rgba(20,184,166,0.3);
+  border-radius: var(--radius-md);
+}
+.calc-field.correct {
+  border-color: var(--success) !important;
+  background: rgba(52,211,153,0.14) !important;
+  color: var(--success);
+}
+.calc-field.wrong {
+  border-color: var(--danger) !important;
+  background: rgba(251,113,133,0.12) !important;
+  color: var(--danger);
+}
+
+/* ═══════════════════════════════════════
+   scenario — بطاقات استثمار بمقاييس
+   ═══════════════════════════════════════ */
+.puzzle.scenario { margin-top: 4px; }
+.scenario-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+.scenario-card {
+  display: block;
+  width: 100%;
+  text-align: right;
+  padding: 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.scenario-card:hover {
+  transform: translateY(-3px);
+  background: rgba(20,184,166,0.08);
+  border-color: rgba(20,184,166,0.35);
+}
+.scenario-card:active { transform: scale(0.98); }
+.scenario-card .sc-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.scenario-card .sc-idx {
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  background: var(--grad-brand);
+  color: #042F2E;
+  border-radius: 10px;
+  font-family: var(--font-lat);
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.scenario-card .sc-label {
+  font-weight: 800;
+  font-size: 1.02rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+.scenario-card .sc-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.scenario-card .sc-metric {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.scenario-card .sc-metric.good { border-color: rgba(52,211,153,0.25); background: rgba(52,211,153,0.05); }
+.scenario-card .sc-metric.warn { border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.05); }
+.scenario-card .sc-metric.muted { border-color: rgba(148,163,184,0.18); }
+.scenario-card .sc-ml {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: none;
+}
+.scenario-card .sc-mv {
+  font-size: 1rem;
+  font-weight: 900;
+  font-family: var(--font-lat);
+  direction: ltr;
+  color: var(--text);
+}
+.scenario-card .sc-pick {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--primary);
+  font-weight: 800;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.scenario-card:hover .sc-pick { opacity: 1; }
+
+.scenario-card.correct {
+  border-color: var(--success);
+  background: rgba(52,211,153,0.14);
+  animation: correctPulse 0.5s ease;
+}
+.scenario-card.correct .sc-idx { background: var(--success); color: #052e16; }
+.scenario-card.wrong {
+  border-color: var(--danger);
+  background: rgba(251,113,133,0.12);
+  animation: shake 0.4s ease;
+}
+.scenario-card.wrong .sc-idx { background: var(--danger); color: #450a0a; }
+.scenario-card:disabled { cursor: default; }
+
+@media (max-width: 480px) {
+  .scenario-card .sc-metrics { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════
+   truefalse — أزرار أوافق/أرفض
+   ═══════════════════════════════════════ */
+.puzzle.truefalse { margin-top: 4px; }
+.tf-statement {
+  background: linear-gradient(135deg, rgba(20,184,166,0.08), rgba(16,185,129,0.04));
+  border: 1px solid rgba(20,184,166,0.25);
+  border-radius: var(--radius-md);
+  padding: 18px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  text-align: right;
+}
+.tf-statement .tf-ico {
+  width: 42px; height: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(20,184,166,0.18);
+  border-radius: 12px;
+  font-size: 1.5rem;
+}
+.tf-statement .tf-text {
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.7;
+  color: var(--text);
+}
+.tf-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.tf-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 1.02rem;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.tf-btn:hover {
+  transform: translateY(-3px);
+  border-color: rgba(20,184,166,0.35);
+  background: rgba(20,184,166,0.08);
+}
+.tf-btn:active { transform: scale(0.97); }
+.tf-btn .tf-emoji { font-size: 2rem; line-height: 1; }
+.tf-btn.reject:hover { border-color: rgba(251,113,133,0.4); background: rgba(251,113,133,0.06); }
+.tf-btn.agree:hover  { border-color: rgba(52,211,153,0.4);  background: rgba(52,211,153,0.06); }
+.tf-btn.correct {
+  border-color: var(--success);
+  background: rgba(52,211,153,0.16);
+  animation: correctPulse 0.5s ease;
+}
+.tf-btn.wrong {
+  border-color: var(--danger);
+  background: rgba(251,113,133,0.12);
+  animation: shake 0.4s ease;
+}
+.tf-btn:disabled { cursor: default; }
+
+/* ═══════════════════════════════════════
+   word — تركيب كلمة
+   ═══════════════════════════════════════ */
+.puzzle.word { margin-top: 4px; }
+.word-target {
+  min-height: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  background: var(--bg-soft);
+  border: 1.5px dashed rgba(20,184,166,0.4);
+  border-radius: var(--radius-md);
+  margin-bottom: 14px;
+  align-items: center;
+}
+.word-target.correct {
+  border-style: solid;
+  border-color: var(--success);
+  background: rgba(52,211,153,0.1);
+}
+.word-target.wrong {
+  border-style: solid;
+  border-color: var(--danger);
+  background: rgba(251,113,133,0.1);
+}
+.word-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--primary);
+  color: #042F2E;
+  border-radius: 10px;
+  font-family: var(--font-lat);
+  font-weight: 900;
+  font-size: 1.1rem;
+  animation: pop 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.word-rm {
+  background: none;
+  border: none;
+  color: rgba(4,47,46,0.7);
+  font-size: 0.9rem;
+  font-weight: 900;
+  padding: 0 2px;
+  cursor: pointer;
+  line-height: 1;
+}
+.word-rm:hover { color: var(--danger); }
+.word-placeholder {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+.word-answer {
+  font-family: var(--font-lat);
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--primary);
+  letter-spacing: 2px;
+}
+
+.word-pool {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.word-tile {
+  width: 44px; height: 44px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-family: var(--font-lat);
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: var(--text);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.word-tile:hover {
+  transform: translateY(-2px);
+  background: rgba(20,184,166,0.1);
+  border-color: rgba(20,184,166,0.4);
+}
+.word-tile:active { transform: scale(0.92); }
+.word-tile:disabled {
+  opacity: 0.3;
+  cursor: default;
+  transform: none;
+}
+
+.word-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.word-actions .btn { width: auto; flex: 1; max-width: 200px; }
+
+/* ═══════════════════════════════════════
+   visual — مشهد بصري
+   ═══════════════════════════════════════ */
+.puzzle.visual { margin-top: 4px; }

@@ -3,16 +3,28 @@
 */
 
 import { DB } from '../db/database.js';
-import { GAME, BRAND } from '../config.js';
-import { computeTotalScore, computeTotalSeconds, resultMessage, maxPossibleScore } from '../core/scoring.js';
+import { GAME, BRAND, SCORING } from '../config.js';
+import {
+  computeTotalScore, computeTotalSeconds, resultMessage,
+  maxPossibleScore, tierOf,
+} from '../core/scoring.js';
 import { formatSeconds } from '../core/dice.js';
 import { escapeHTML } from '../core/validation.js';
 import { el, showScreen } from './screen.js';
 import { burstConfetti } from './confetti.js';
 import { mountFeedback } from './feedback.js';
 import { openLeaderboard } from './leaderboard.js';
-import { startGame } from './game.js';
-import { stopCurrentTimer } from './game.js';
+import { startGame, stopCurrentTimer } from './game.js';
+import { typeLabel } from './puzzles/index.js';
+import { STAGES_META } from '../data/questions.js';
+
+const TIER_EMOJI = {
+  elite: '🏆',
+  strong: '🔥',
+  developing: '📈',
+  starting: '🌱',
+  welcome: '🤝',
+};
 
 export async function showResult(session) {
   stopCurrentTimer();
@@ -21,29 +33,58 @@ export async function showResult(session) {
   const score = computeTotalScore(session.results);
   const seconds = computeTotalSeconds(session.results);
   const maxScore = maxPossibleScore();
+  const tier = tierOf(score, maxScore);
+  const tierEmoji = TIER_EMOJI[tier] || '🎯';
+  const correctCount = session.correctCount();
+  const totalQ = session.results.length;
+  const perfect = correctCount === totalQ && totalQ > 0;
 
+  // عرض أولي (placeholder للترتيب)
   root.innerHTML = `
     <div class="card result-hero reveal">
+      <div class="result-bg-deco" aria-hidden="true"></div>
       <div class="result-trophies" aria-hidden="true">🏆 🚀 🏆</div>
-      <img src="${BRAND.logoPath}" alt="شعار النادي" width="64" height="64"
-           style="margin:0 auto 10px;filter:drop-shadow(0 8px 20px rgba(139,92,246,.4))">
+      <div class="result-medal tier-${tier}" aria-hidden="true">${tierEmoji}</div>
       <div class="result-title">انتهى التحدي 🎉</div>
       <div class="result-name">${escapeHTML(session.name)}</div>
       <div class="result-score"><span class="num">${score}</span> نقطة</div>
-      <div id="rankPlaceholder"></div>
       <div class="result-msg" id="resultMsg"></div>
-      <p style="font-size:.78rem;color:var(--text-dim);margin-top:6px" class="num">الزمن: ${formatSeconds(seconds)}</p>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-top:6px" class="num">
+        الإجابات الصحيحة: <b style="color:var(--success)">${correctCount}/${totalQ}</b>
+        ${perfect ? ' · ⭐ إكمال مثالي' : ''}
+        · الزمن: ${formatSeconds(seconds)}
+      </p>
+      <div id="rankPlaceholder"></div>
       <div id="podiumPlaceholder"></div>
+      <div id="stagesSummary"></div>
       <div class="result-actions">
-        <button class="btn" id="lbBtn">شاهد ترتيب جميع المشاركين</button>
-        <button class="btn gold" id="shareBtn">شارك نتيجتك 📤</button>
-        <button class="btn ghost" id="replayBtn">إعادة التحدي 🔄</button>
+        <button class="btn primary" id="lbBtn">🏆 لوحة المتصدرين</button>
+        <button class="btn gold" id="shareBtn">📤 شارك نتيجتك</button>
+        <button class="btn ghost" id="replayBtn">🔄 إعادة التحدي</button>
       </div>
       <div id="feedbackMount"></div>
       <footer class="result-credit">${BRAND.clubName} · ${GAME.name} — ${BRAND.credit}</footer>
     </div>`;
 
-  const fe = new Intl.NumberFormat('ar');
+  // ملخص المراحل
+  const summaryEl = el('stagesSummary');
+  if (summaryEl && session.results && session.results.length) {
+    const rowsHtml = session.results.map((r, i) => {
+      const meta = STAGES_META[r.stage];
+      const q = session.stageQuestion(i);
+      return `
+        <div class="rs-row ${r.correct ? 'correct' : 'wrong'}">
+          <div class="rs-ico">${r.correct ? '✅' : '❌'}</div>
+          <div>
+            <div class="rs-name">${meta.emoji} ${escapeHTML(meta.title)}</div>
+            <div class="rs-type">${escapeHTML(typeLabel(r.type))}</div>
+          </div>
+          <div class="rs-pts">${r.points || 0}</div>
+          <div></div>
+        </div>`;
+    }).join('');
+    summaryEl.innerHTML = `<div class="result-stages">${rowsHtml}</div>`;
+  }
 
   // 1) محاولة الحفظ في قاعدة البيانات الحقيقية
   let saved = null;
@@ -54,7 +95,7 @@ export async function showResult(session) {
     saved = { ok: false, reason: 'network', message: 'حدث خطأ أثناء الحفظ، حاول لاحقًا.' };
   }
 
-  burstConfetti();
+  burstConfetti(score, maxScore);
 
   const msg = resultMessage(score, maxScore);
   el('resultMsg').textContent = `${msg.emoji} ${msg.message}`;
@@ -78,7 +119,7 @@ export async function showResult(session) {
     el('rankPlaceholder').innerHTML = `
       <div class="result-rank-box">
         <div class="rank-chip"><span class="lb">نقاطك</span><span class="vl num">${score}</span></div>
-        <div class="rank-chip"><span class="lb">حالة الحفظ</span><span class="vl" style="font-size:.9rem;font-family:var(--font-ar)">غير مكتمل</span></div>
+        <div class="rank-chip"><span class="lb">الحد الأقصى</span><span class="vl num">${maxScore}</span></div>
       </div>
       <p style="font-size:.82rem;color:var(--danger);margin-top:8px">${why}</p>`;
     el('lbBtn').addEventListener('click', () => openLeaderboard());
@@ -89,7 +130,7 @@ export async function showResult(session) {
     startGame(session.name, (newSession) => showResult(newSession));
   });
 
-  el('shareBtn').addEventListener('click', () => shareResult(session, score, saved));
+  el('shareBtn').addEventListener('click', () => shareResult(session, score, saved, tier));
 
   mountFeedback(el('feedbackMount'), session.name);
 }
@@ -114,14 +155,15 @@ function renderPodium(best3) {
   el('podiumPlaceholder').innerHTML = `<div class="podium">${html}</div>`;
 }
 
-function shareResult(session, score, saved) {
+function shareResult(session, score, saved, tier) {
+  const tierEmoji = TIER_EMOJI[tier] || '🎯';
   const rankText = saved && saved.ok ? `ترتيبي: #${saved.rank} من ${saved.total} مشارك` : 'جرب بنفسك! 🎮';
   const text =
     `🎮 خارج الصندوق | نادي الابتكار وريادة الأعمال\n` +
-    `👤 ${session.name}\n` +
+    `${tierEmoji} ${session.name}\n` +
     `⭐ ${score} نقطة\n` +
     `${rankText}\n` +
-    `هل تستطيع التفكير بطريقة مختلفة؟ 🚀`;
+    `هل تفكر خارج الصندوق؟ 🚀`;
 
   const fallback = () => showShareFallback(text, score);
 

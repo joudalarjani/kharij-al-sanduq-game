@@ -9,22 +9,24 @@ import { SUPABASE_ENV } from './supabase-env.js';
 
 export const GAME = {
   name: 'خارج الصندوق',
-  tagline: 'هل تستطيع التفكير بطريقة مختلفة؟',
-  description: '4 مراحل، أسئلة غير متوقعة، ونقاط تحدد مكانك بين المتسابقين.',
+  tagline: 'فكّر كريادي… واستثمر بذكاء',
+  description: 'أربع مراحل من الألغاز والتحديات تختبر قدرتك على التفكير الاستثماري واتخاذ القرارات الريادية.',
   stagesCount: 4,
   startLabel: 'ابدأ التحدي 🚀',
+  questionsPerStage: 4, // عدد الأسئلة لكل مرحلة
 };
 
+/* ─── هوية النادي — ألوان مستوحاة من شعار الابتكار وريادة الأعمال ─── */
 export const BRAND = {
-  /* ─── هوية النادي — استبدل الألوان هنا بألوان شعار النادي الحقيقي ─── */
   colors: {
-    bg:        '#070B18', // خلفية داكنة
-    bgSoft:    '#0C1228',
+    bg:        '#06141A', // خلفية داكنة تركوازية
+    bgSoft:    '#0A1F26',
     surface:   'rgba(255,255,255,0.045)',
+    surface2:  'rgba(255,255,255,0.09)',
     border:    'rgba(255,255,255,0.1)',
-    primary:   '#8B5CF6', // بنفسجي — اللون الرئيسي
-    secondary: '#22D3EE', // سماوي — اللون الثانوي
-    accent:    '#F59E0B', // ذهبي/كهرماني — للنقاط والتمييز
+    primary:   '#14B8A6', // تركوازي — اللون الرئيسي
+    secondary: '#10B981', // أخضر زمرّدي — اللون الثانوي
+    accent:    '#FBBF24', // ذهبي — للنقاط والتمييز
     success:   '#34D399',
     danger:    '#FB7185',
     text:      '#F1F5F9',
@@ -35,46 +37,64 @@ export const BRAND = {
   logoPath: 'assets/club-logo.svg',
 };
 
-/* ─── نظام النقاط ───
-   basePoints:  نقاط الإجابة الصحيحة لكل مرحلة
-   speedBonusRatio: نسبة البونص القصوى من النقاط الأساسية عند الإجابة السريعة
-      البونص الفعلي = basePoints × speedBonusRatio × (الزمن المتبقي ÷ الزمن الكلي)
-   timeouts:    الوقت المسموح لكل مرحلة بالثواني */
-export const SCORING = {
-  basePoints: { 1: 100, 2: 150, 3: 200, 4: 300 },
-  speedBonusRatio: 0.5,
-  timeouts: { 1: 10, 2: 8, 3: 12, 4: 15 },
-  maxScore: 1125,
+/* ─── مراحل اللعبة بألوانها المميزة ───
+   العنوان الفرعي يظهر في شاشة البداية وخريطة المراحل. */
+export const STAGE_THEMES = {
+  1: { title: 'أساسيات المستثمر',  subtitle: 'مفاهيم الاستثمار والتمويل',         accent: '#14B8A6', emoji: '📊', icon: 'trending' },
+  2: { title: 'عقلية الريادي',      subtitle: 'سيناريوهات ريادة الأعمال والقرار',  accent: '#10B981', emoji: '🚀', icon: 'rocket' },
+  3: { title: 'اختبر قرارك',        subtitle: 'تحليل بيانات وحالات استثمارية',     accent: '#22D3EE', emoji: '🧠', icon: 'graph' },
+  4: { title: 'خارج الصندوق',       subtitle: 'التحدي النهائي — استثمار + ريادة + مخاطرة', accent: '#FBBF24', emoji: '🔥', icon: 'fire' },
 };
 
-/* ─── رسائل النتيجة حسب مستوى الأداء (قابلة للتعديل) ───
-   thresholds: نسبة من النقاط القصوى */
+/* ─── نظام النقاط ───
+   - basePoints:  نقاط الأساس لكل مرحلة
+   - difficultyMultiplier: يُضاعف نقاط الأسئلة الصعبة (حسب المرحلة)
+   - speedBonusRatio: نسبة البونص القصوى من نقاط الأساس عند الإجابة السريعة
+   - timeouts:    الوقت المسموح لكل مرحلة (ثوانٍ) — يُعدَّل لكل سؤال عبر timeoutMs */
+export const SCORING = {
+  basePoints: { 1: 100, 2: 150, 3: 200, 4: 300 },
+  difficultyMultiplier: { 1: 1.0, 2: 1.15, 3: 1.3, 4: 1.6 },
+  speedBonusRatio: 0.5,
+  timeouts: { 1: 25, 2: 30, 3: 35, 4: 40 }, // ثوانٍ افتراضية
+  perfectRunBonus: 100, // مكافأة إكمال كل المراحل بأربع إجابات صحيحة
+  maxScore: 2300,
+};
+
+/* ─── رسائل النتيجة حسب مستوى الأداء ─── */
 export const RESULT_MESSAGES = [
-  { minRatio: 0.8,  emoji: '🔥', message: 'واضح إنك تفكر خارج الصندوق 🔥' },
-  { minRatio: 0.45, emoji: '👀', message: 'عندك عقل مبتكر… جولة ثانية؟ 👀' },
-  { minRatio: 0,    emoji: '😅', message: 'الصندوق فاز هذه المرة 😂' },
+  { minRatio: 0.85, tier: 'elite',    emoji: '🏆', message: 'مستثمر يفكر خارج الصندوق فعلًا!' },
+  { minRatio: 0.65, tier: 'strong',   emoji: '🔥', message: 'عقلية ريادية واضحة — القرار عندك حقيقي' },
+  { minRatio: 0.40, tier: 'developing', emoji: '📈', message: 'لديك أساس جيد… طوّر أدواتك' },
+  { minRatio: 0.15, tier: 'starting', emoji: '🌱', message: 'بداية موفقة — تعلّم أكثر وارجع أقوى' },
+  { minRatio: 0,    tier: 'welcome',  emoji: '🤝', message: 'مرحبًا بك في عالم الاستثمار وريادة الأعمال' },
 ];
 
-/* ─── Reactions بعد كل إجابة (تُختار عشوائيًا، لا تتكرر) ─── */
+/* ─── عبارات ردود الفعل بعد كل إجابة ─── */
 export const REACTIONS = {
   correct: [
-    'أوووه! 🔥',
-    'أصبت!',
-    'واضح إنك مركز 👀',
-    'ثقة عالية! 🎯',
-    'جواب ذكي! ✨',
+    'قرار ذكي 💡',
+    'تحليل ممتاز 🎯',
+    'ثقة عالية ✨',
+    'قراءة صحيحة للسوق 📊',
+    'عقلية ريادية حقيقية 🚀',
+    'واضح إنك فاهم 💪',
   ],
   wrong: [
-    'قريب… لكن لا 😭',
-    'مو هذه!',
-    'الصندوق بدأ يفوز 😂',
-    'تراك قربت… شوي 😬',
-    'لا لا لا 😄',
+    'ليست أفضل إجابة 🤔',
+    'فكّر مرة ثانية في القرار',
+    'السوق أعقد مما يبدو 📉',
+    'قريب، لكن مو هذه ⚖️',
+    'كل خطأ درس للمستقبل 🌱',
+  ],
+  timeout: [
+    'الوقت انتهى ⏰',
+    'السوق ما ينتظر أحد ⌛',
   ],
   intro: [
-    'أروووح يلا 🔥',
-    'خلنا نبدأ 💪',
-    'ركز… وابدأ 🎯',
+    'يلا نبدأ 💪',
+    'ركّز… وابدأ 🎯',
+    'الوقت جزء من اللعبة ⏱️',
+    'خارج الصندوق… يعني بره 📦',
   ],
 };
 
@@ -84,15 +104,7 @@ export const NAME_RULES = {
   maxLength: 30,
 };
 
-/* ─── قاعدة البيانات — Supabase ───
-   تُحقن القيم تلقائيًا وقت النشر من GitHub Secrets (tools/build-config.mjs)
-   عبر الملف المولّد js/supabase-env.js — لا تضع مفتاحًا سريًا هنا أبدًا.
-   قيمة فارغة = وضع تجريبي محلي (localStorage) للاختبار قبل النشر.
-   لتفعيل قاعدة بيانات حقيقية مشتركة يُضبط Secret التاليان في الريبو:
-     1) SUPABASE_URL       = Project URL  (https://xxxx.supabase.co)
-     2) SUPABASE_ANON_KEY  = anon public key (علني وليس سريًا)
-   ثم شغّل supabase/schema.sql ثم supabase/seed_questions.sql من SQL Editor.
-   التفاصيل الكاملة في README.md */
+/* ─── قاعدة البيانات — Supabase ─── */
 export const SUPABASE = {
   url: (SUPABASE_ENV && SUPABASE_ENV.url) || '',
   anonKey: (SUPABASE_ENV && SUPABASE_ENV.anonKey) || '',

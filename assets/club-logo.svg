@@ -1,29 +1,68 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="نادي الابتكار وريادة الأعمال">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="نادي الابتكار وريادة الأعمال">
   <defs>
     <linearGradient id="gb" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#8B5CF6"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+      <stop offset="0" stop-color="#10B981"/>
+      <stop offset="0.5" stop-color="#14B8A6"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
     </linearGradient>
     <linearGradient id="gg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FBBF24"/>
-      <stop offset="1" stop-color="#F59E0B"/>
+      <stop offset="0" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#0F766E"/>
     </linearGradient>
+    <linearGradient id="gd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0B2030"/>
+      <stop offset="1" stop-color="#06141A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#14B8A6" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#14B8A6" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <circle cx="110" cy="110" r="104" fill="#0C1228" stroke="url(#gb)" stroke-width="3"/>
-  <circle cx="110" cy="110" r="96" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
-  <!-- الصندوق -->
+
+  <!-- خلفية دائرية -->
+  <circle cx="120" cy="120" r="116" fill="url(#gd)" stroke="url(#gb)" stroke-width="3.5"/>
+  <circle cx="120" cy="120" r="108" fill="none" stroke="rgba(20,184,166,0.18)" stroke-width="1.2"/>
+  <circle cx="120" cy="120" r="92" fill="url(#glow)"/>
+
+  <!-- شارة الابتكار: نجمة مضيئة ترمز للريادة -->
+  <g transform="translate(58,52)">
+    <path d="M16 0 L19.5 11 L31 12 L22 19.5 L25 31 L16 24.5 L7 31 L10 19.5 L1 12 L12.5 11 Z"
+          fill="url(#gg)" stroke="#A7F3D0" stroke-width="1"/>
+  </g>
+
+  <!-- شارة العقل: نصفي دماغ -->
+  <g transform="translate(146,46)" fill="url(#gb)">
+    <path d="M18 4 C9 4 3 10 3 18 C3 22 5 25 7 27 C5 30 6 33 9 34 C12 35 16 34 18 32 C20 34 24 35 27 34 C30 33 31 30 29 27 C31 25 33 22 33 18 C33 10 27 4 18 4 Z M16 8 L16 28 M9 14 L27 14"
+          stroke="#A7F3D0" stroke-width="1.2" fill="rgba(255,255,255,0.06)"/>
+    <path d="M16 8 L16 28" stroke="#A7F3D0" stroke-width="1.4" fill="none"/>
+    <path d="M11 13 Q16 18 21 13" stroke="#A7F3D0" stroke-width="1" fill="none"/>
+    <path d="M11 19 Q16 24 21 19" stroke="#A7F3D0" stroke-width="1" fill="none"/>
+  </g>
+
+  <!-- رمز الصندوق المفتوح (قلب اللعبة) مع سهم يخرج منه -->
+  <g transform="translate(56,108)">
+    <rect x="0" y="14" width="92" height="60" rx="9" fill="rgba(15,118,110,0.18)" stroke="#A7F3D0" stroke-width="3"/>
+    <path d="M0 26 L92 26" stroke="#A7F3D0" stroke-width="3"/>
+    <!-- غطاء مفتوح -->
+    <path d="M-4 14 L46 -10 L96 14" fill="none" stroke="url(#gb)" stroke-width="3.5" stroke-linejoin="round"/>
+    <!-- سهم صاعد من الصندوق (فكرة تخرج) -->
+    <g transform="translate(58,8)">
+      <path d="M0 22 L8 4 L16 22 L12 22 L12 36 L4 36 L4 22 Z" fill="url(#gg)" stroke="#A7F3D0" stroke-width="1.2"/>
+    </g>
+  </g>
+
+  <!-- نقاط مضيئة تعكس البيانات -->
   <g>
-    <rect x="52" y="92" width="66" height="56" rx="10" fill="none" stroke="#F1F5F9" stroke-width="7"/>
-    <path d="M52 108 L118 108" stroke="#F1F5F9" stroke-width="7"/>
+    <circle cx="36" cy="120" r="2.4" fill="#34D399"/>
+    <circle cx="174" cy="148" r="2.2" fill="#22D3EE"/>
+    <circle cx="44" cy="186" r="1.8" fill="#A7F3D0"/>
+    <circle cx="186" cy="110" r="2" fill="#34D399"/>
   </g>
-  <!-- الفكرة تخرج من الصندوق -->
-  <g fill="url(#gb)">
-    <path d="M128 100 l22 -16 8 26 z"/>
-  </g>
-  <g fill="url(#gg)">
-    <path d="M155 66 c0 -7 13 -7 13 0 s-13 7 -13 0z" />
-    <path d="M160 72 l4 14 2 -13z"/>
-    <rect x="159" y="86" width="8" height="6" rx="3"/>
-  </g>
-  <text x="110" y="186" text-anchor="middle" font-family="Tahoma, Arial" font-size="13" font-weight="bold" fill="#94A3B8">نادي الابتكار وريادة الأعمال</text>
+
+  <!-- خط فاصل -->
+  <line x1="38" y1="200" x2="202" y2="200" stroke="rgba(20,184,166,0.35)" stroke-width="1"/>
+
+  <!-- اسم النادي -->
+  <text x="120" y="219" text-anchor="middle" font-family="Tajawal, Tahoma, Arial, sans-serif"
+        font-size="12" font-weight="800" fill="#A7F3D0">نادي الابتكار وريادة الأعمال</text>
 </svg>

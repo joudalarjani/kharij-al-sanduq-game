@@ -1,8 +1,8 @@
 /*
   ══════════════════════════════════════════════════════════════
   نظام النقاط — منطق نقي قابل للاختبار ولا يعتمد على DOM
-  النقاط = إجابة صحيحة فقط
-  البونص = basePoints × speedBonusRatio × (المتبقي ÷ الكلي)
+  النقاط = (الإجابة صحيحة) × (الأساس × معامل الصعوبة + بونص السرعة)
+  البونص = basePoints × difficultyMult × speedBonusRatio × (المتبقي ÷ الكلي)
   لا تُحتسب النقاط أكثر من مرة، ولا تُستخدم أرقام عشوائية
   ══════════════════════════════════════════════════════════════
 */
@@ -18,16 +18,23 @@ export function stageBasePoints(stage) {
 }
 
 export function stageTimeLimitSeconds(stage) {
-  return SCORING.timeouts[stage] || 10;
+  return SCORING.timeouts[stage] || 30;
 }
 
-export function answerScore(stage, correct, remainingMs, totalMs) {
+export function stageDifficultyMultiplier(stage) {
+  return SCORING.difficultyMultiplier[stage] || 1;
+}
+
+/* نقاط سؤال: تجمع معامل الصعوبة × الأساس + بونص السرعة */
+export function answerScore(stage, correct, remainingMs, totalMs, difficulty = 1) {
   if (!correct) return 0;
   const base = stageBasePoints(stage);
-  if (totalMs <= 0) return base;
+  const mult = stageDifficultyMultiplier(stage);
+  const stageMax = base * mult;
+  if (totalMs <= 0) return Math.round(stageMax);
   const ratio = clamp(remainingMs, 0, totalMs) / totalMs;
-  const bonus = Math.round(base * SCORING.speedBonusRatio * ratio);
-  return base + bonus;
+  const bonus = Math.round(stageMax * SCORING.speedBonusRatio * ratio);
+  return Math.round(stageMax + bonus);
 }
 
 export function computeTotalScore(stageResults) {
@@ -38,16 +45,17 @@ export function computeTotalSeconds(stageResults) {
   return (stageResults || []).reduce((sum, s) => sum + (s ? s.elapsedMs || 0 : 0), 0) / 1000;
 }
 
-/* إعادة حساب مطلقة من أحداث اللعب (لا تعتمد على points المرسلة) —
-   تُستخدم في الوضع التجريبي المحلي لتطابق منطق الخادم تمامًا. */
+/* إعادة حساب مطلقة من أحداث اللعب (لا تعتمد على points المرسلة) */
 export function scoreFromEvents(stageResults) {
   return (stageResults || []).reduce((sum, ev) => {
     if (!ev || !ev.correct) return sum;
     const base = stageBasePoints(ev.stage);
+    const mult = stageDifficultyMultiplier(ev.stage);
+    const stageMax = base * mult;
     const total = ev.totalMs || stageTimeLimitSeconds(ev.stage) * 1000;
     const remaining = Math.max(0, Math.min(ev.remainingMs || 0, total));
-    const bonus = Math.round(base * SCORING.speedBonusRatio * (total > 0 ? remaining / total : 0));
-    return sum + base + bonus;
+    const bonus = Math.round(stageMax * SCORING.speedBonusRatio * (total > 0 ? remaining / total : 0));
+    return sum + Math.round(stageMax + bonus);
   }, 0);
 }
 
@@ -60,16 +68,23 @@ export function secondsFromEvents(stageResults) {
 }
 
 export function maxPossibleScore() {
-  return Object.keys(SCORING.basePoints).reduce((sum, st) => {
+  let total = 0;
+  for (const st of Object.keys(SCORING.basePoints)) {
     const base = stageBasePoints(Number(st));
-    return sum + base + Math.round(base * SCORING.speedBonusRatio);
-  }, 0);
+    const mult = stageDifficultyMultiplier(Number(st));
+    total += Math.round(base * mult) + Math.round(base * mult * SCORING.speedBonusRatio);
+  }
+  return total + (SCORING.perfectRunBonus || 0);
 }
 
 /* ─── رسالة حسب مستوى النتيجة (قابلة للتعديل من config) ─── */
 export function resultMessage(score, maxScore) {
   const ratio = maxScore > 0 ? score / maxScore : 0;
   return RESULT_MESSAGES.find((m) => ratio >= m.minRatio) || RESULT_MESSAGES[RESULT_MESSAGES.length - 1];
+}
+
+export function tierOf(score, maxScore) {
+  return resultMessage(score, maxScore).tier;
 }
 
 /* ─── ترتيب: نقاط تنازليًا ثم زمن تصاعديًا لكسر التعادل ─── */

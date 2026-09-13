@@ -17,6 +17,7 @@ create extension if not exists pgcrypto;
 create table if not exists public.question_map (
   qid          text primary key,
   stage        integer not null check (stage between 1 and 4),
+  type         text not null,
   answer_index integer not null check (answer_index >= 0),
   base_points  integer not null check (base_points > 0),
   timeout_sec  numeric not null check (timeout_sec > 0)
@@ -26,8 +27,8 @@ create table if not exists public.entries (
   id             uuid primary key default gen_random_uuid(),
   name           text not null,
   name_key       text not null,
-  score          integer not null check (score >= 0 and score <= 1125),
-  total_seconds  numeric not null check (total_seconds > 0 and total_seconds <= 900),
+  score          integer not null check (score >= 0 and score <= 9999),
+  total_seconds  numeric not null check (total_seconds > 0 and total_seconds <= 1800),
   stage_results  jsonb not null default '[]'::jsonb,
   created_at     timestamptz not null default now()
 );
@@ -94,17 +95,20 @@ declare
   v_secs       numeric := 0;
   v_ev         jsonb;
   v_qid        text;
-  v_selected   integer;
+  v_selected   jsonb;
   v_remaining  numeric;
   v_total      numeric;
   v_elapsed    numeric;
   v_map        record;
-  v_base       integer;
+  v_base       numeric;
+  v_mult       numeric;
+  v_stage_max  numeric;
   v_points     integer;
   v_rate       integer;
   v_rank       integer;
   v_total_cnt  integer;
   v_best3      jsonb;
+  v_is_correct boolean;
 begin
   v_name := public.sanitize_name(coalesce(p_name, ''));
   if length(v_name) < 2 or length(v_name) > 30 then
@@ -135,7 +139,6 @@ begin
       continue; -- سؤال غير معروف: لا يُمنح نقاط
     end if;
 
-    v_selected  := coalesce((v_ev ->> 'selectedIndex')::integer, -1);
     v_remaining := coalesce((v_ev ->> 'remainingMs')::numeric, 0);
     v_total     := coalesce((v_ev ->> 'totalMs')::numeric, v_map.timeout_sec * 1000);
     v_elapsed   := coalesce((v_ev ->> 'elapsedMs')::numeric,
@@ -149,15 +152,43 @@ begin
     if v_remaining < 0 then v_remaining := 0; end if;
     if v_remaining > v_total then v_remaining := v_total; end if;
 
-    v_points := 0;
-    if v_selected = v_map.answer_index then
-      v_base := v_map.base_points;
-      v_points := v_base + round(v_base * 0.5 * v_remaining / greatest(v_total, 1));
+    -- التحقق من الصحة حسب نوع السؤال
+    v_selected := v_ev -> 'selected';
+    v_is_correct := false;
+
+    case v_map.type
+      when 'mc', 'decision', 'whatWould', 'scenario', 'visual' then
+        v_is_correct := (v_selected #>> '{}') is not null
+                        and ((v_selected #>> '{}')::integer) = v_map.answer_index;
+      when 'findError', 'truefalse', 'word' then
+        v_is_correct := v_selected #>> '{}' = (v_ev ->> 'expected');
+      when 'match' then
+        v_is_correct := ((v_selected -> 'correctPairs')::integer) = ((v_selected -> 'totalPairs')::integer);
+      when 'order' then
+        v_is_correct := (v_selected ->> 'isCorrect')::boolean;
+      when 'calc' then
+        v_is_correct := v_selected #>> '{}' = (v_ev ->> 'expected');
+      else
+        v_is_correct := false;
+    end case;
+
+    v_base       := v_map.base_points;
+    v_mult       := case v_map.stage when 1 then 1.0 when 2 then 1.15 when 3 then 1.3 else 1.6 end;
+    v_stage_max  := v_base * v_mult;
+    v_points     := 0;
+
+    if v_is_correct then
+      v_points := round(v_stage_max + v_stage_max * 0.5 * v_remaining / greatest(v_total, 1))::integer;
     end if;
 
     v_score := v_score + v_points;
     v_secs  := v_secs + (v_elapsed / 1000);
   end loop;
+
+  -- مكافأة الإكمال المثالي
+  if (select bool_and((e ->> 'correct')::boolean) from jsonb_array_elements(p_events) e) then
+    v_score := v_score + 100;
+  end if;
 
   v_secs := greatest(0.1, v_secs);
 

@@ -1,34 +1,44 @@
 /* ════════════════════════════════════════════
    خارج الصندوق — الأنماط الأساسية والتوكنز
-   عدّل ألوان الشعار هنا (في :root) لتطابق شعار النادي
+   الهوية: تركوازي/أخضر زمرّدي مستوحاة من شعار الابتكار وريادة الأعمال.
+   عدّل ألوان الشعار في :root لتطابق شعار النادي.
    ════════════════════════════════════════════ */
 
 :root {
-  /* هوية النادي — استبدل بهذه بألوان الشعار الحقيقي */
-  --bg:        #070B18;
-  --bg-soft:   #0C1228;
+  /* هوية النادي — استبدل هنا بألوان شعار النادي */
+  --bg:        #06141A;     /* خلفية داكنة تركوازية */
+  --bg-soft:   #0A1F26;
+  --bg-card:   rgba(255, 255, 255, 0.04);
   --surface:   rgba(255, 255, 255, 0.045);
   --surface-2: rgba(255, 255, 255, 0.09);
   --border:    rgba(255, 255, 255, 0.1);
-  --primary:   #8B5CF6;
-  --secondary: #22D3EE;
-  --accent:    #F59E0B;
+  --border-soft: rgba(20, 184, 166, 0.18);
+  --primary:   #14B8A6;     /* تركوازي — اللون الرئيسي */
+  --secondary: #10B981;     /* أخضر زمرّدي — اللون الثانوي */
+  --tertiary:  #22D3EE;     /* سماوي — تأكيد وتنويع */
+  --accent:    #FBBF24;     /* ذهبي — للنقاط والتمييز */
+  --accent-soft: rgba(251, 191, 36, 0.18);
   --success:   #34D399;
   --danger:    #FB7185;
   --text:      #F1F5F9;
   --text-dim:  #94A3B8;
+  --text-soft: #64748B;
 
-  /* تدرجات */
-  --grad-brand: linear-gradient(135deg, #8B5CF6 0%, #22D3EE 100%);
+  /* تدرّجات */
+  --grad-brand: linear-gradient(135deg, #14B8A6 0%, #10B981 100%);
+  --grad-teal:  linear-gradient(135deg, #14B8A6 0%, #0EA5E9 100%);
   --grad-gold:  linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+  --grad-fire:  linear-gradient(135deg, #F59E0B 0%, #FB7185 100%);
+  --grad-glass: linear-gradient(135deg, rgba(20,184,166,0.08) 0%, rgba(16,185,129,0.04) 100%);
 
   /* أبعاد */
   --radius-lg:  22px;
   --radius-md:  14px;
   --radius-sm:  10px;
   --space:      16px;
-  --shadow-card: 0 18px 45px rgba(0, 0, 0, 0.45);
-  --maxw:       560px;
+  --shadow-card: 0 18px 45px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 0 4px rgba(20, 184, 166, 0.16);
+  --maxw:       620px;
 
   /* خطوط */
   --font-ar: 'Tajawal', 'Segoe UI', Tahoma, Arial, sans-serif;
@@ -37,9 +47,6 @@
 
 /* ─── Reset ─── */
 *, *::before, *::after { box-sizing: border-box; }
-
-/* سمة hidden تُحترم من أي قاعدة لاحقة مهما كانت قوتها:
-   تمنع أن تُلغي display:grid ونحوها إخفاء أي عنصر (modal/بروجزر/لوحة). */
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
@@ -51,6 +58,7 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 img, svg { display: block; max-width: 100%; }
 button { font-family: inherit; cursor: pointer; }
@@ -59,12 +67,12 @@ h1, h2, h3, p, ul { margin: 0; }
 ul { padding: 0; list-style: none; }
 
 :focus-visible {
-  outline: 3px solid var(--secondary);
+  outline: 3px solid var(--primary);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
-::selection { background: rgba(139, 92, 246, 0.45); }
+::selection { background: rgba(20, 184, 166, 0.4); color: #fff; }
 
 .app-root {
   position: relative;
@@ -74,30 +82,41 @@ ul { padding: 0; list-style: none; }
   padding: 18px 18px 40px;
 }
 
-/* ─── خلفية متحركة ─── */
+/* ─── خلفية متحركة: شبكة + أوربينات ─── */
 .bg-canvas {
   position: fixed;
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(1000px 500px at 85% -10%, rgba(139, 92, 246, 0.22), transparent 60%),
-    radial-gradient(900px 500px at 5% 110%, rgba(34, 211, 238, 0.16), transparent 60%),
+    radial-gradient(1100px 600px at 90% -10%, rgba(20, 184, 166, 0.22), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(16, 185, 129, 0.18), transparent 60%),
+    radial-gradient(800px 500px at 50% 50%, rgba(14, 165, 233, 0.06), transparent 60%),
     var(--bg);
   overflow: hidden;
+}
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(20,184,166,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20,184,166,0.045) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.8) 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.8) 30%, transparent 80%);
 }
 .bg-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(70px);
+  filter: blur(80px);
   opacity: 0.35;
-  animation: drift 16s ease-in-out infinite alternate;
+  animation: drift 18s ease-in-out infinite alternate;
 }
-.bg-orb.o1 { width: 320px; height: 320px; background: #6D28D9; top: -80px; right: -80px; }
-.bg-orb.o2 { width: 260px; height: 260px; background: #0E7490; bottom: -60px; left: -60px; animation-delay: -6s; }
-.bg-orb.o3 { width: 160px; height: 160px; background: #B45309; top: 50%; left: 50%; opacity: 0.2; animation-delay: -11s; }
+.bg-orb.o1 { width: 360px; height: 360px; background: #0D9488; top: -100px; right: -100px; }
+.bg-orb.o2 { width: 280px; height: 280px; background: #047857; bottom: -80px; left: -80px; animation-delay: -7s; }
+.bg-orb.o3 { width: 180px; height: 180px; background: #FBBF24; top: 50%; left: 50%; opacity: 0.14; animation-delay: -12s; }
 @keyframes drift {
   from { transform: translate(0, 0) scale(1); }
-  to   { transform: translate(30px, -30px) scale(1.15); }
+  to   { transform: translate(36px, -36px) scale(1.18); }
 }
 
 /* ─── نص ─── */
@@ -121,22 +140,36 @@ ul { padding: 0; list-style: none; }
   font-weight: 800;
   color: #fff;
   background: var(--grad-brand);
-  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 12px 28px rgba(20, 184, 166, 0.32);
   transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
   width: 100%;
+  position: relative;
+  overflow: hidden;
 }
-.btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.18), transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+.btn:hover::after { transform: translateX(100%); }
+.btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
 .btn:active { transform: translateY(0) scale(0.98); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.btn.gold { background: var(--grad-gold); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.35); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; filter: grayscale(0.5); }
+.btn.primary { background: var(--grad-brand); }
+.btn.gold { background: var(--grad-gold); box-shadow: 0 12px 28px rgba(245, 158, 11, 0.32); }
+.btn.fire { background: var(--grad-fire); box-shadow: 0 12px 28px rgba(251, 113, 133, 0.32); }
 .btn.ghost {
   background: var(--surface-2);
   border: 1px solid var(--border);
   box-shadow: none;
   font-weight: 700;
 }
-.btn.small { padding: 11px 20px; font-size: 0.95rem; width: auto; }
-.btn-arrow { font-size: 1.1em; }
+.btn.small { padding: 11px 22px; font-size: 0.92rem; width: auto; border-radius: 999px; }
+.btn-arrow { font-size: 1.1em; display: inline-block; transition: transform 0.2s ease; }
+.btn:hover .btn-arrow { transform: translateX(-4px); }
 
 /* ─── حقول ─── */
 .field {
@@ -152,8 +185,8 @@ ul { padding: 0; list-style: none; }
 .field::placeholder { color: var(--text-dim); opacity: 0.7; }
 .field:focus {
   outline: none;
-  border-color: var(--secondary);
-  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.18);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-glow);
   background: rgba(255, 255, 255, 0.065);
 }
 textarea.field { resize: vertical; min-height: 96px; }
@@ -177,7 +210,10 @@ textarea.field { resize: vertical; min-height: 96px; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
 }
 
 /* ─── كبسولة ─── */
@@ -203,14 +239,14 @@ textarea.field { resize: vertical; min-height: 96px; }
   margin: 0 auto 6px;
   padding: 8px 16px;
   border-radius: 999px;
-  background: rgba(7, 11, 24, 0.85);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(7, 19, 26, 0.92);
+  border: 1px solid rgba(251, 191, 36, 0.4);
   color: var(--accent);
   font-weight: 800;
   font-size: 1rem;
   letter-spacing: 0.5px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
 }
 
 /* ─── حركات عامة ─── */
@@ -231,17 +267,26 @@ textarea.field { resize: vertical; min-height: 96px; }
   50% { transform: translateY(-8px); }
 }
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
-  50%      { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0.12); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
+  50%      { box-shadow: 0 0 0 10px rgba(20, 184, 166, 0.14); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 .reveal { animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .reveal-1 { animation-delay: 0.06s; }
 .reveal-2 { animation-delay: 0.14s; }
 .reveal-3 { animation-delay: 0.22s; }
+.reveal-4 { animation-delay: 0.30s; }
 
 /* ─── شاشات ─── */
 .screen { display: none; }
@@ -264,4 +309,5 @@ textarea.field { resize: vertical; min-height: 96px; }
     scroll-behavior: auto !important;
   }
   .bg-orb { animation: none; }
+  .bg-grid { display: none; }
 }

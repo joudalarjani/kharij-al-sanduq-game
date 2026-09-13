@@ -1,7 +1,11 @@
-/* شاشة البداية + إدخال الاسم مع التحقق والتنظيف والرسائل */
+/*
+  شاشة البداية — أول انطباع للاعب.
+  شعار النادي + اسم اللعبة + tagline + وصف + نموذج اسم + CTA قوي.
+*/
 
 import { validateName, sanitizeName } from '../core/validation.js';
 import { el, showScreen } from './screen.js';
+import { GAME, BRAND, STAGE_THEMES } from '../config.js';
 
 let nameInput;
 let onStartCb = null;
@@ -20,8 +24,7 @@ export function initLanding(onStart) {
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const raw = nameInput.value;
-    const res = validateName(raw);
+    const res = validateName(nameInput.value);
     if (!res.ok) {
       errorBox.textContent = res.errors[0];
       nameInput.classList.add('field-error');
@@ -41,7 +44,7 @@ function launch(name, startBtn) {
   setTimeout(() => {
     showScreen('game');
     if (onStartCb) onStartCb(name);
-  }, 420);
+  }, 480);
 }
 
 export function landingNameInput() {
