@@ -47,16 +47,21 @@ export function computeTotalSeconds(stageResults) {
 
 /* إعادة حساب مطلقة من أحداث اللعب (لا تعتمد على points المرسلة) */
 export function scoreFromEvents(stageResults) {
-  return (stageResults || []).reduce((sum, ev) => {
-    if (!ev || !ev.correct) return sum;
+  const events = stageResults || [];
+  let sum = events.reduce((acc, ev) => {
+    if (!ev || !ev.correct) return acc;
     const base = stageBasePoints(ev.stage);
     const mult = stageDifficultyMultiplier(ev.stage);
     const stageMax = base * mult;
     const total = ev.totalMs || stageTimeLimitSeconds(ev.stage) * 1000;
     const remaining = Math.max(0, Math.min(ev.remainingMs || 0, total));
     const bonus = Math.round(stageMax * SCORING.speedBonusRatio * (total > 0 ? remaining / total : 0));
-    return sum + Math.round(stageMax + bonus);
+    return acc + Math.round(stageMax + bonus);
   }, 0);
+  // مكافأة الإكمال المثالي
+  const allCorrect = events.length > 0 && events.every((ev) => ev && ev.correct);
+  if (allCorrect) sum += SCORING.perfectRunBonus || 0;
+  return sum;
 }
 
 export function secondsFromEvents(stageResults) {

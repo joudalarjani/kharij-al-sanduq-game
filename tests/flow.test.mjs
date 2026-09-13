@@ -35,11 +35,43 @@ function playPerfect(name) {
   s.pickQuestions();
   for (let i = 0; i < 4; i++) {
     const q = s.stageQuestion(i);
-    const total = SCORING.timeouts[i + 1] * 1000;
-    const idx = q.type === 'visual' ? q.scene.items.findIndex((x) => x.isOdd) : q.answerIndex;
-    s.resolveAnswer(i, idx, total, total, total);
+    const total = (q.timeoutMs || SCORING.timeouts[i + 1]) * 1000;
+    let correct;
+    switch (q.type) {
+      case 'visual':       correct = q.scene.items.findIndex((x) => x.isOdd); break;
+      case 'mc':
+      case 'decision':
+      case 'whatWould':
+      case 'scenario':     correct = q.answerIndex; break;
+      case 'findError':    correct = q.correctId; break;
+      case 'truefalse':    correct = q.correctAnswer; break;
+      case 'word':         correct = q.target; break;
+      case 'calc':         correct = q.correctAnswer; break;
+      case 'order':        correct = q.correctOrder.slice(); break;
+      case 'match': {
+        const pairs = {};
+        for (const p of q.pairs) pairs[p.id] = p.id;
+        correct = pairs;
+        break;
+      }
+      default:            correct = null;
+    }
+    s.resolveAnswer(i, correct, total, total, total);
   }
   return s.toPayload();
+}
+
+// مجموع نقاط الأساس × معامل الصعوبة (بدون بونص السرعة)
+function basesSum() {
+  let s = 0;
+  for (let st = 1; st <= 4; st++) {
+    s += SCORING.basePoints[st] * SCORING.difficultyMultiplier[st];
+  }
+  return Math.round(s);
+}
+// مجموع النقاط القصوى (مع البونص الكامل + مكافأة الإكمال)
+function perfectSum() {
+  return basesSum() + Math.round(basesSum() * SCORING.speedBonusRatio) + (SCORING.perfectRunBonus || 0);
 }
 
 async function play(name, msDelay = 0) {
@@ -57,10 +89,10 @@ async function play(name, msDelay = 0) {
 
 console.log('═ تدفق قاعدة البيانات (وضع محلي) ═');
 
-await test('تسجيل نتيجة صحيحة كاملة = 1125 والمركز الأول', async () => {
+await test(`تسجيل نتيجة صحيحة كاملة = ${perfectSum()} والمركز الأول`, async () => {
   const res = await play('سارة');
   assert.equal(res.ok, true);
-  assert.equal(res.score, 1125);
+  assert.equal(res.score, perfectSum());
   assert.equal(res.rank, 1);
   assert.equal(res.total, 1);
 });
@@ -69,17 +101,18 @@ await test('إعادة المحاولة بنتيجة أقل لا تكسر الن
   // محاولة أبطأ (bonus أقل) لنفس الاسم
   const p = playPerfect('سارة');
   p.stage_results = p.stage_results.map((r) => ({ ...r, remainingMs: 0, elapsedMs: r.totalMs }));
-  const slow = { ...p, score: SCORING.basePoints[1] + SCORING.basePoints[2] + SCORING.basePoints[3] + SCORING.basePoints[4] };
+  const slowScore = basesSum();
+  const slow = { ...p, score: slowScore };
   const res = await DB.submitGame(slow);
   const lb = await DB.getLeaderboard();
   assert.equal(res.rank, 1);
-  assert.equal(res.score, 750); // بدون بونص
+  assert.equal(res.score, slowScore); // بدون بونص
   assert.equal(lb.entries[0].name, 'سارة');
-  assert.equal(lb.entries[0].score, 1125); // الأفضل يبقى
+  assert.equal(lb.entries[0].score, perfectSum()); // الأفضل يبقى
 });
 
 await test('الترتيب يراعي النقاط ثم كسر التعادل بالوقت', async () => {
-  // نفس النقاط (كل اللاعبين كاملون 1125) — الزمن يفصلهم: أسرع = أعلى
+  // نفس النقاط (كل اللاعبين كاملون) — الزمن يفصلهم: أسرع = أعلى
   await play('حنان', 100);
   await play('أمل', 300);
   await play('بسمة', 500);
@@ -114,7 +147,7 @@ await test('الاسم يُنقى قبل الحفظ في وضع محلي', async
   const p = playPerfect('<script>alert(1)</script>');
   const res = await DB.submitGame({ ...p, name: '<script>x</script>' });
   const lb = await DB.getLeaderboard();
-  const entry = lb.entries.find((e) => e.score === 1125 && e.name.includes('<'));
+  const entry = lb.entries.find((e) => e.score === perfectSum() && e.name.includes('<'));
   assert.ok(!entry, 'لا يجب أن يحتوي اسم محفوظ على وسوم');
 });
 
